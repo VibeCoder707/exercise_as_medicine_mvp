@@ -135,7 +135,7 @@ def show_patient_profile():
                 # Add button to create prescription
                 if st.button("Create Prescription"):
                     st.session_state['page'] = "Exercise Prescription"
-                    st.experimental_rerun()
+                    st.rerun()
         else:
             st.info("No patients in database")
     except Exception as e:
@@ -259,7 +259,7 @@ def show_exercise_prescription():
                 # Add a button to go to Progress Tracking
                 if st.button("Start Tracking Progress"):
                     st.session_state['page'] = "Progress Tracking"
-                    st.experimental_rerun()
+                    st.rerun()
             except Exception as e:
                 st.error(f"Error saving prescription: {str(e)}")
                 st.exception(e)
