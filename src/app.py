@@ -89,10 +89,17 @@ def main():
     st.title("Exercise as Medicine MVP")
     
     # Sidebar for navigation
+    if 'page' not in st.session_state:
+        st.session_state['page'] = "Patient Profile"
+    
     page = st.sidebar.selectbox(
         "Select Page",
-        ["Patient Profile", "Exercise Prescription", "Progress Tracking"]
+        ["Patient Profile", "Exercise Prescription", "Progress Tracking"],
+        index=["Patient Profile", "Exercise Prescription", "Progress Tracking"].index(st.session_state['page'])
     )
+    
+    # Update session state when page changes
+    st.session_state['page'] = page
     
     if page == "Patient Profile":
         show_patient_profile()
@@ -112,30 +119,35 @@ def show_patient_profile():
         if patients:
             st.subheader("Existing Patients")
             
-            # Create a selection box for patients
-            patient_options = {f"{p.name} (ID: {p.id})": p.id for p in patients}
-            selected_patient = st.selectbox(
-                "Select a patient to view or edit",
-                options=list(patient_options.keys())
-            )
+            # Create columns for layout
+            col1, col2 = st.columns([2, 1])
+            
+            with col1:
+                # Create a selection box for patients
+                patient_options = {f"{p.name} (ID: {p.id})": p.id for p in patients}
+                selected_patient = st.selectbox(
+                    "Select a patient to view or edit",
+                    options=list(patient_options.keys()),
+                    key="patient_selector"
+                )
+            
+            with col2:
+                # Add button to create prescription
+                if st.button("Create Prescription", key="create_prescription"):
+                    selected_patient_id = patient_options[selected_patient]
+                    st.session_state['current_patient_id'] = selected_patient_id
+                    st.session_state['page'] = "Exercise Prescription"
+                    st.rerun()
             
             if selected_patient:
-                # Store the selected patient ID in session state
-                selected_patient_id = patient_options[selected_patient]
-                st.session_state['current_patient_id'] = selected_patient_id
-                
                 # Display patient details
+                selected_patient_id = patient_options[selected_patient]
                 patient = next(p for p in patients if p.id == selected_patient_id)
                 with st.expander("Patient Details", expanded=True):
                     st.write(f"Name: {patient.name}")
                     st.write(f"Age: {patient.age}")
                     st.write(f"Risk Factors: {', '.join(patient.risk_factors) if patient.risk_factors else 'None'}")
                     st.write(f"Goals: {', '.join(patient.goals) if patient.goals else 'None'}")
-                
-                # Add button to create prescription
-                if st.button("Create Prescription"):
-                    st.session_state['page'] = "Exercise Prescription"
-                    st.rerun()
         else:
             st.info("No patients in database")
     except Exception as e:
