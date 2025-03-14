@@ -255,31 +255,31 @@ def show_exercise_prescription():
         
         notes = st.text_area("Additional Notes")
         
-                    col1, col2 = st.columns([1, 2])
-                    with col1:
-                        if st.button("Generate Prescription"):
-                            try:
-                                prescription = crud.create_prescription(
-                                    db=db,
-                                    patient_id=patient.id,
-                                    exercises=[{"name": ex.name, "description": ex.description} for cond in selected_conditions for ex in get_exercises_for_condition(cond.lower().replace(" ", "_"))],
-                                    frequency=frequency,
-                                    duration=duration,
-                                    notes=notes
-                                )
-                                st.session_state['current_prescription_id'] = prescription.id
-                                st.session_state['prescription_generated'] = True
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"Error saving prescription: {str(e)}")
-                                st.exception(e)
-        
-                    # Show success message and navigation button after prescription is generated
-                    if 'prescription_generated' in st.session_state:
-                        st.success("Prescription generated and saved successfully!")
-                        if st.button("Go to Progress Tracking"):
-                            st.session_state['page'] = "Progress Tracking"
-                            st.rerun()
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            if st.button("Generate Prescription"):
+                try:
+                    prescription = crud.create_prescription(
+                        db=db,
+                        patient_id=patient.id,
+                        exercises=[{"name": ex.name, "description": ex.description} for cond in selected_conditions for ex in get_exercises_for_condition(cond.lower().replace(" ", "_"))],
+                        frequency=frequency,
+                        duration=duration,
+                        notes=notes
+                    )
+                    st.session_state['current_prescription_id'] = prescription.id
+                    st.session_state['prescription_generated'] = True
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error saving prescription: {str(e)}")
+                    st.exception(e)
+
+        # Show success message and navigation button after prescription is generated
+        if 'prescription_generated' in st.session_state:
+            st.success("Prescription generated and saved successfully!")
+            if st.button("Go to Progress Tracking"):
+                st.session_state['page'] = "Progress Tracking"
+                st.rerun()
     except Exception as e:
         st.error(f"Database error: {str(e)}")
         st.exception(e)
