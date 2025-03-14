@@ -9,7 +9,9 @@ DB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))
 os.makedirs(DB_DIR, exist_ok=True)
 
 # Create the database URL
-DATABASE_URL = f"sqlite:///{os.path.join(DB_DIR, 'exercise_medicine.db')}"
+DB_PATH = os.path.join(DB_DIR, 'exercise_medicine.db')
+DATABASE_URL = f"sqlite:///{DB_PATH}"
+print(f"Database path: {DB_PATH}")
 
 # Create engine with SQLite configuration
 engine = create_engine(
