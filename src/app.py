@@ -3,8 +3,8 @@ from datetime import datetime
 from dataclasses import dataclass
 from typing import List
 from sqlalchemy.orm import Session
-from db.database import SessionLocal
-from db import crud, models
+from src.db.database import SessionLocal
+from src.db import crud, models
 
 @dataclass
 class Exercise:
