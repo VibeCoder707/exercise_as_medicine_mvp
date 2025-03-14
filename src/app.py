@@ -111,12 +111,31 @@ def show_patient_profile():
         patients = crud.list_all_patients(db)
         if patients:
             st.subheader("Existing Patients")
-            for patient in patients:
-                with st.expander(f"Patient: {patient.name} (ID: {patient.id})"):
+            
+            # Create a selection box for patients
+            patient_options = {f"{p.name} (ID: {p.id})": p.id for p in patients}
+            selected_patient = st.selectbox(
+                "Select a patient to view or edit",
+                options=list(patient_options.keys())
+            )
+            
+            if selected_patient:
+                # Store the selected patient ID in session state
+                selected_patient_id = patient_options[selected_patient]
+                st.session_state['current_patient_id'] = selected_patient_id
+                
+                # Display patient details
+                patient = next(p for p in patients if p.id == selected_patient_id)
+                with st.expander("Patient Details", expanded=True):
                     st.write(f"Name: {patient.name}")
                     st.write(f"Age: {patient.age}")
                     st.write(f"Risk Factors: {', '.join(patient.risk_factors) if patient.risk_factors else 'None'}")
                     st.write(f"Goals: {', '.join(patient.goals) if patient.goals else 'None'}")
+                
+                # Add button to create prescription
+                if st.button("Create Prescription"):
+                    st.session_state['page'] = "Exercise Prescription"
+                    st.experimental_rerun()
         else:
             st.info("No patients in database")
     except Exception as e:
@@ -236,6 +255,11 @@ def show_exercise_prescription():
                 )
                 st.success("Prescription generated and saved successfully!")
                 st.session_state['current_prescription_id'] = prescription.id
+                
+                # Add a button to go to Progress Tracking
+                if st.button("Start Tracking Progress"):
+                    st.session_state['page'] = "Progress Tracking"
+                    st.experimental_rerun()
             except Exception as e:
                 st.error(f"Error saving prescription: {str(e)}")
                 st.exception(e)
