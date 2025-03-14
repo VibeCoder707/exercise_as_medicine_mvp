@@ -46,4 +46,4 @@ exercise_as_medicine_mvp/
 2. Add user authentication
 3. Expand exercise library
 4. Add video integration
-5. Implement progress analytics and reporting
+5. Implement progress analytics and reporting# exercise_as_medicine_mvp
