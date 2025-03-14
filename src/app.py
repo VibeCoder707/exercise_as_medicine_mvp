@@ -20,7 +20,31 @@ def main():
     else:
         show_progress_tracking()
 
+def show_all_patients():
+    """Show all patients in the database"""
+    with get_db() as db:
+        try:
+            patients = crud.list_all_patients(db)
+            if patients:
+                st.subheader("All Patients")
+                for patient in patients:
+                    st.write(f"ID: {patient.id}")
+                    st.write(f"Name: {patient.name}")
+                    st.write(f"Age: {patient.age}")
+                    st.write(f"Risk Factors: {patient.risk_factors}")
+                    st.write(f"Goals: {patient.goals}")
+                    st.write("---")
+            else:
+                st.info("No patients in database")
+        except Exception as e:
+            st.error(f"Error fetching patients: {str(e)}")
+
 def show_patient_profile():
+    # Show existing patients
+    show_all_patients()
+    
+    st.markdown("---")
+    st.subheader("Add New Patient")
     st.header("Patient Profile")
     
     # Basic patient information form

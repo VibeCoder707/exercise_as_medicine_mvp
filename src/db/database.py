@@ -9,8 +9,8 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(CURRENT_DIR)))
 DB_FILE = 'exercise_medicine.db'
 DB_PATH = os.path.join(PROJECT_ROOT, DB_FILE)
 
-# Create database URL - using root directory for visibility
-DATABASE_URL = f"sqlite:///{DB_FILE}"
+# Create database URL with absolute path
+DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 print("="*50)
 print("Database Configuration")
@@ -36,12 +36,23 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def init_db():
     """Initialize the database"""
     try:
+        # Create all tables
         Base.metadata.create_all(bind=engine)
         print("\nDatabase initialized successfully")
-        print(f"Looking for database at: {DB_PATH}")
-        print(f"Database file exists: {os.path.exists(DB_PATH)}")
+        
+        # Verify tables
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        print(f"Created tables: {tables}")
+        
+        # Check database file
+        print(f"Database location: {DB_PATH}")
+        print(f"Database exists: {os.path.exists(DB_PATH)}")
+        if os.path.exists(DB_PATH):
+            print(f"Database size: {os.path.getsize(DB_PATH)} bytes")
     except Exception as e:
         print(f"Error initializing database: {e}")
+        raise
 
 def get_db():
     """Get database session"""
