@@ -246,6 +246,8 @@ def show_exercise_prescription():
         if 'db' in locals():
             db.close()
 
+from src.visualizations import display_progress_visualizations
+
 def show_progress_tracking():
     st.header("Progress Tracking")
     
@@ -268,31 +270,43 @@ def show_progress_tracking():
         
         st.write(f"Tracking progress for: {patient.name}")
         
-        # Progress tracking form
-        date = st.date_input("Date")
-        duration = st.number_input("Exercise Duration (minutes)", min_value=0)
-        difficulty = st.slider("Difficulty Level (1-5)", 1, 5)
-        pain = st.slider("Pain Level (0-10)", 0, 10)
-        notes = st.text_area("Session Notes")
+        # Create tabs for data entry and visualizations
+        tab1, tab2 = st.tabs(["Record Progress", "View Progress"])
         
-        if st.button("Record Progress"):
-            try:
-                progress = crud.record_progress(
-                    db=db,
-                    patient_id=patient.id,
-                    prescription_id=prescription.id,
-                    date=date,
-                    duration=duration,
-                    difficulty_level=difficulty,
-                    pain_level=pain,
-                    notes=notes
-                )
-                st.success("Progress recorded successfully!")
-                
-                # Show recent progress history
-                progress_history = crud.get_patient_progress(db, patient.id)
-                if progress_history:
-                    st.subheader("Recent Progress")
+        with tab1:
+            # Progress tracking form
+            date = st.date_input("Date")
+            duration = st.number_input("Exercise Duration (minutes)", min_value=0)
+            difficulty = st.slider("Difficulty Level (1-5)", 1, 5)
+            pain = st.slider("Pain Level (0-10)", 0, 10)
+            notes = st.text_area("Session Notes")
+            
+            if st.button("Record Progress"):
+                try:
+                    progress = crud.record_progress(
+                        db=db,
+                        patient_id=patient.id,
+                        prescription_id=prescription.id,
+                        date=date,
+                        duration=duration,
+                        difficulty_level=difficulty,
+                        pain_level=pain,
+                        notes=notes
+                    )
+                    st.success("Progress recorded successfully!")
+                except Exception as e:
+                    st.error(f"Error recording progress: {str(e)}")
+                    st.exception(e)
+        
+        with tab2:
+            # Get all progress entries for visualization
+            progress_history = crud.get_patient_progress(db, patient.id)
+            display_progress_visualizations(progress_history)
+            
+            # Show recent entries in a table
+            if progress_history:
+                st.subheader("Recent Progress Entries")
+                with st.expander("View Details"):
                     for entry in progress_history[:5]:  # Show last 5 entries
                         st.write(f"Date: {entry.date.strftime('%Y-%m-%d')}")
                         st.write(f"Duration: {entry.duration} minutes")
@@ -301,9 +315,7 @@ def show_progress_tracking():
                         if entry.notes:
                             st.write(f"Notes: {entry.notes}")
                         st.write("---")
-            except Exception as e:
-                st.error(f"Error recording progress: {str(e)}")
-                st.exception(e)
+            
     except Exception as e:
         st.error(f"Database error: {str(e)}")
         st.exception(e)
