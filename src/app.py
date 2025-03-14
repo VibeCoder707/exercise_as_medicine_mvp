@@ -112,16 +112,16 @@ def show_patient_profile():
         if patients:
             st.subheader("Existing Patients")
             for patient in patients:
-                st.write(f"ID: {patient.id}")
-                st.write(f"Name: {patient.name}")
-                st.write(f"Age: {patient.age}")
-                st.write(f"Risk Factors: {patient.risk_factors}")
-                st.write(f"Goals: {patient.goals}")
-                st.write("---")
+                with st.expander(f"Patient: {patient.name} (ID: {patient.id})"):
+                    st.write(f"Name: {patient.name}")
+                    st.write(f"Age: {patient.age}")
+                    st.write(f"Risk Factors: {', '.join(patient.risk_factors) if patient.risk_factors else 'None'}")
+                    st.write(f"Goals: {', '.join(patient.goals) if patient.goals else 'None'}")
         else:
             st.info("No patients in database")
     except Exception as e:
         st.error(f"Error fetching patients: {str(e)}")
+        st.exception(e)  # This will show the full error trace
     finally:
         if 'db' in locals():
             db.close()

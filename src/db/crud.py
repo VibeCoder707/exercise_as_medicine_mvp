@@ -5,7 +5,16 @@ from . import models
 
 def list_all_patients(db: Session) -> List[models.Patient]:
     """List all patients in the database"""
-    return db.query(models.Patient).all()
+    try:
+        patients = db.query(models.Patient).order_by(models.Patient.id.desc()).all()
+        print(f"Found {len(patients)} patients in database")
+        for patient in patients:
+            print(f"Patient ID: {patient.id}, Name: {patient.name}")
+        return patients
+    except Exception as e:
+        print(f"Error listing patients: {str(e)}")
+        db.rollback()
+        raise
 
 def create_patient(
     db: Session,
