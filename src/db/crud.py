@@ -59,3 +59,75 @@ def get_patient_prescriptions(
     return db.query(models.Prescription).filter(
         models.Prescription.patient_id == patient_id
     ).all()
+
+def get_prescription(db: Session, prescription_id: int) -> Optional[models.Prescription]:
+    """Get a prescription by ID"""
+    return db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+
+def record_progress(
+    db: Session,
+    patient_id: int,
+    prescription_id: int,
+    date: datetime,
+    duration: int,
+    difficulty_level: int,
+    pain_level: int,
+    notes: str
+) -> models.Progress:
+    """Record a progress entry"""
+    db_progress = models.Progress(
+        patient_id=patient_id,
+        prescription_id=prescription_id,
+        date=date,
+        duration=duration,
+        difficulty_level=difficulty_level,
+        pain_level=pain_level,
+        notes=notes
+    )
+    db.add(db_progress)
+    db.commit()
+    db.refresh(db_progress)
+    return db_progress
+
+def get_patient_progress(
+    db: Session,
+    patient_id: int
+) -> List[models.Progress]:
+    """Get all progress entries for a patient"""
+    return db.query(models.Progress).filter(
+        models.Progress.patient_id == patient_id
+    ).order_by(models.Progress.date.desc()).all()
+
+def record_progress(
+    db: Session,
+    patient_id: int,
+    prescription_id: int,
+    date: datetime,
+    duration: int,
+    difficulty_level: int,
+    pain_level: int,
+    notes: str
+) -> models.Progress:
+    """Record a progress entry"""
+    db_progress = models.Progress(
+        patient_id=patient_id,
+        prescription_id=prescription_id,
+        date=date,
+        duration=duration,
+        difficulty_level=difficulty_level,
+        pain_level=pain_level,
+        notes=notes
+    )
+    db.add(db_progress)
+    db.commit()
+    db.refresh(db_progress)
+    return db_progress
+
+def get_patient_progress(
+    db: Session,
+    patient_id: int
+) -> List[models.Progress]:
+    """Get all progress entries for a patient"""
+    return db.query(models.Progress).filter(
+        models.Progress.patient_id == patient_id
+    ).order_by(models.Progress.date.desc()).all()

@@ -23,6 +23,7 @@ class Patient(Base):
     
     conditions = relationship("Condition", secondary=patient_conditions, back_populates="patients")
     prescriptions = relationship("Prescription", back_populates="patient")
+    progress_entries = relationship("Progress", back_populates="patient")
 
 class Condition(Base):
     __tablename__ = 'conditions'
@@ -45,3 +46,20 @@ class Prescription(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     patient = relationship("Patient", back_populates="prescriptions")
+    progress_entries = relationship("Progress", back_populates="prescription")
+
+class Progress(Base):
+    __tablename__ = 'progress'
+    
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey('patients.id'))
+    prescription_id = Column(Integer, ForeignKey('prescriptions.id'))
+    date = Column(DateTime)
+    duration = Column(Integer)  # in minutes
+    difficulty_level = Column(Integer)
+    pain_level = Column(Integer)
+    notes = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    patient = relationship("Patient", back_populates="progress_entries")
+    prescription = relationship("Prescription", back_populates="progress_entries")

@@ -1,8 +1,80 @@
 import streamlit as st
 from datetime import datetime
+from dataclasses import dataclass
+from typing import List
 from sqlalchemy.orm import Session
-from .db.database import SessionLocal
-from .db import crud, models
+from db.database import SessionLocal
+from db import crud, models
+
+@dataclass
+class Exercise:
+    name: str
+    description: str
+    difficulty_level: str
+    target_areas: List[str]
+
+def get_exercises_for_condition(condition: str) -> List[Exercise]:
+    """Get recommended exercises for a specific condition."""
+    exercise_library = {
+        "fall_prevention": [
+            Exercise(
+                name="Balance Walking",
+                description="Walk heel to toe, as if on a tightrope. Take 20 steps forward.",
+                difficulty_level="Beginner",
+                target_areas=["Balance", "Core stability"]
+            ),
+            Exercise(
+                name="Single Leg Stand",
+                description="Stand on one leg for 30 seconds, then switch.",
+                difficulty_level="Beginner",
+                target_areas=["Balance", "Lower body strength"]
+            )
+        ],
+        "pain_management": [
+            Exercise(
+                name="Gentle Stretching",
+                description="Perform gentle full-body stretches, holding each for 15-30 seconds.",
+                difficulty_level="Beginner",
+                target_areas=["Flexibility", "Pain relief"]
+            ),
+            Exercise(
+                name="Water Walking",
+                description="Walk in chest-deep water for 10-15 minutes.",
+                difficulty_level="Beginner",
+                target_areas=["Cardiovascular", "Joint mobility"]
+            )
+        ],
+        "diabetes_management": [
+            Exercise(
+                name="Brisk Walking",
+                description="Walk at a brisk pace for 15-20 minutes.",
+                difficulty_level="Moderate",
+                target_areas=["Cardiovascular", "Blood sugar control"]
+            ),
+            Exercise(
+                name="Resistance Band Exercises",
+                description="Perform upper and lower body exercises with resistance bands.",
+                difficulty_level="Moderate",
+                target_areas=["Strength", "Metabolic health"]
+            )
+        ],
+        "weight_management": [
+            Exercise(
+                name="Circuit Training",
+                description="Alternate between cardio and strength exercises for 20 minutes.",
+                difficulty_level="Advanced",
+                target_areas=["Full body", "Cardiovascular"]
+            ),
+            Exercise(
+                name="HIIT Walking",
+                description="Alternate between 1 minute fast walking and 2 minutes normal pace.",
+                difficulty_level="Moderate",
+                target_areas=["Cardiovascular", "Weight loss"]
+            )
+        ]
+    }
+    
+    return exercise_library.get(condition, [])
 
 def get_db_session():
     """Get database session"""
@@ -205,8 +277,30 @@ def show_progress_tracking():
         
         if st.button("Record Progress"):
             try:
-                # TODO: Implement progress recording in database
+                progress = crud.record_progress(
+                    db=db,
+                    patient_id=patient.id,
+                    prescription_id=prescription.id,
+                    date=date,
+                    duration=duration,
+                    difficulty_level=difficulty,
+                    pain_level=pain,
+                    notes=notes
+                )
                 st.success("Progress recorded successfully!")
+                
+                # Show recent progress history
+                progress_history = crud.get_patient_progress(db, patient.id)
+                if progress_history:
+                    st.subheader("Recent Progress")
+                    for entry in progress_history[:5]:  # Show last 5 entries
+                        st.write(f"Date: {entry.date.strftime('%Y-%m-%d')}")
+                        st.write(f"Duration: {entry.duration} minutes")
+                        st.write(f"Difficulty: {entry.difficulty_level}/5")
+                        st.write(f"Pain: {entry.pain_level}/10")
+                        if entry.notes:
+                            st.write(f"Notes: {entry.notes}")
+                        st.write("---")
             except Exception as e:
                 st.error(f"Error recording progress: {str(e)}")
                 st.exception(e)
